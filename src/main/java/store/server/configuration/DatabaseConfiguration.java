@@ -1,4 +1,4 @@
-package store.server.user.configuration;
+package store.server.configuration;
 
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Configuration;
@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
+@EntityScan("store.server")
 @EnableTransactionManagement
-@EntityScan("store.server.user")
-@EnableJpaRepositories("store.server.user")
-public class DatabaseConfiguration {}
+@EnableJpaRepositories("store.server")
+public class DatabaseConfiguration {
+}
