@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import store.server.token.dto.TokenRequest;
+import store.server.token.dto.TokenResponse;
 import store.server.user.domain.User;
 import store.server.user.service.UserService;
 
@@ -42,6 +44,11 @@ public class UserRestController {
     @GetMapping("/all")
     public ResponseEntity<List<User>> findAll() {
         return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
+    }
+
+    @PutMapping("/login")
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody TokenRequest tokenRequest) {
+        return new ResponseEntity<>(userService.login(tokenRequest), HttpStatus.OK);
     }
 
 }

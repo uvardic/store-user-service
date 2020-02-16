@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import store.server.exception.InvalidUserInfoException;
+import store.server.exception.UserAuthenticationException;
+import store.server.exception.UserDeactivatedException;
 import store.server.exception.UserNotFoundException;
+import store.server.token.dto.TokenRequest;
+import store.server.token.dto.TokenResponse;
+import store.server.token.service.TokenService;
 import store.server.user.domain.User;
 import store.server.user.repository.UserRepository;
 
@@ -19,6 +24,8 @@ public class UserService {
     private static final Pattern BCRYPT_PATTERN = Pattern.compile("^\\$2[ayb]\\$.{56}$");
 
     private final UserRepository userRepository;
+
+    private final TokenService tokenService;
 
     @Transactional
     public void deleteById(Long existingId) {
@@ -79,7 +86,7 @@ public class UserService {
     }
 
     private boolean isPasswordPlain(String password) {
-        return BCRYPT_PATTERN.matcher(password).matches();
+        return !BCRYPT_PATTERN.matcher(password).matches();
     }
 
     public User findById(Long id) {
@@ -91,6 +98,27 @@ public class UserService {
 
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+
+    public TokenResponse login(TokenRequest tokenRequest) {
+        User foundUser = userRepository.findByEmail(tokenRequest.getEmail())
+                .orElseThrow(() -> new UserNotFoundException(
+                        String.format("User with email: %s wasn't found!", tokenRequest.getEmail()))
+                );
+
+        if (!foundUser.isActive())
+            throw new UserDeactivatedException(
+                    String.format("Account: %s is deactivated!", foundUser.getEmail())
+            );
+
+        if (incorrectPassword(tokenRequest.getPassword(), foundUser.getPassword()))
+            throw new UserAuthenticationException("Invalid password!");
+
+        return tokenService.generateTokenFor(foundUser);
+    }
+
+    private boolean incorrectPassword(String plainText, String password) {
+        return BCrypt.checkpw(plainText, password);
     }
 
 }
