@@ -29,14 +29,9 @@ public class UserService {
 
     @Transactional
     public void deleteById(Long existingId) {
-        if (userNotFound(existingId))
-            throw new UserNotFoundException(String.format("User with id: %d not found!", existingId));
-
-        userRepository.deleteById(existingId);
-    }
-
-    private boolean userNotFound(Long id) {
-        return userRepository.findById(id).isEmpty();
+        User foundUser = findById(existingId);
+        foundUser.setActive(false);
+        userRepository.save(foundUser);
     }
 
     @Transactional
@@ -77,6 +72,10 @@ public class UserService {
         userRequest.setActive(true);
 
         return userRepository.save(userRequest);
+    }
+
+    private boolean userNotFound(Long id) {
+        return userRepository.findById(id).isEmpty();
     }
 
     private boolean emailChanged(Long existingId, String newEmail) {
