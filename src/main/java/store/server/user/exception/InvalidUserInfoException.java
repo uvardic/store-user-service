@@ -1,4 +1,4 @@
-package store.server.exception;
+package store.server.user.exception;
 
 public class InvalidUserInfoException extends RuntimeException {
 

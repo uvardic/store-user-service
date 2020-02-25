@@ -1,13 +1,13 @@
-package store.server.exception.advice;
+package store.server.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import store.server.exception.InvalidUserInfoException;
-import store.server.exception.UserAuthenticationException;
-import store.server.exception.UserDeactivatedException;
-import store.server.exception.UserNotFoundException;
+import store.server.user.exception.InvalidUserInfoException;
+import store.server.user.exception.UserAuthenticationException;
+import store.server.user.exception.UserDeactivatedException;
+import store.server.user.exception.UserNotFoundException;
 
 @ControllerAdvice
 public class RestControllerAdvice {

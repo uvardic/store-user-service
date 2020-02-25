@@ -3,14 +3,14 @@ package store.server.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
-import store.server.exception.InvalidUserInfoException;
-import store.server.exception.UserAuthenticationException;
-import store.server.exception.UserDeactivatedException;
-import store.server.exception.UserNotFoundException;
 import store.server.token.dto.TokenRequest;
 import store.server.token.dto.TokenResponse;
 import store.server.token.service.TokenService;
 import store.server.user.domain.User;
+import store.server.user.exception.InvalidUserInfoException;
+import store.server.user.exception.UserAuthenticationException;
+import store.server.user.exception.UserDeactivatedException;
+import store.server.user.exception.UserNotFoundException;
 import store.server.user.repository.UserRepository;
 
 import javax.transaction.Transactional;
