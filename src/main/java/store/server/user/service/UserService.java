@@ -36,7 +36,7 @@ public class UserService {
 
     @Transactional
     public User save(User userRequest) {
-        if (emailExists(userRequest.getEmail()))
+        if (emailExists(userRequest))
             throw new InvalidUserInfoException(
                     String.format("Email: %s already exists!", userRequest.getEmail())
             );
@@ -47,45 +47,43 @@ public class UserService {
         return userRepository.save(userRequest);
     }
 
+    private boolean emailExists(User userRequest) {
+        return userRepository.findByEmail(userRequest.getEmail()).isPresent();
+    }
+
     private String hashPassword(String plainText) {
         return BCrypt.hashpw(plainText, BCrypt.gensalt());
     }
 
-    private boolean emailExists(String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
-
     @Transactional
     public User update(Long existingId, User userRequest) {
-        if (userNotFound(existingId))
-            throw new UserNotFoundException(String.format("User with id: %d not found!", existingId));
+        User existingUser = findById(existingId);
 
-        if (emailChanged(existingId, userRequest.getEmail()) && emailExists(userRequest.getEmail()))
+        if (emailChanged(existingUser, userRequest) && emailExists(userRequest))
             throw new InvalidUserInfoException(
                     String.format("Email: %s already exists!", userRequest.getEmail())
             );
 
-        if (isPasswordPlain(userRequest.getPassword()))
+        return userRepository.save(mapRequest(existingUser, userRequest));
+    }
+
+    private boolean emailChanged(User existingUser, User userRequest) {
+        return !existingUser.getEmail().equals(userRequest.getEmail());
+    }
+
+    private boolean isPasswordPlain(User userRequest) {
+        return !BCRYPT_PATTERN.matcher(userRequest.getPassword()).matches();
+    }
+
+    private User mapRequest(User existingUser, User userRequest) {
+        existingUser.setEmail(userRequest.getEmail());
+        existingUser.setLastName(userRequest.getLastName());
+        existingUser.setFirstName(userRequest.getFirstName());
+
+        if (isPasswordPlain(userRequest))
             userRequest.setPassword(hashPassword(userRequest.getPassword()));
 
-        userRequest.setId(existingId);
-        userRequest.setActive(true);
-
-        return userRepository.save(userRequest);
-    }
-
-    private boolean userNotFound(Long id) {
-        return userRepository.findById(id).isEmpty();
-    }
-
-    private boolean emailChanged(Long existingId, String newEmail) {
-        return !userRepository.findById(existingId)
-                .orElseThrow(IllegalStateException::new)
-                .getEmail().equals(newEmail);
-    }
-
-    private boolean isPasswordPlain(String password) {
-        return !BCRYPT_PATTERN.matcher(password).matches();
+        return existingUser;
     }
 
     public User findById(Long id) {
@@ -100,24 +98,24 @@ public class UserService {
     }
 
     public TokenResponse login(TokenRequest tokenRequest) {
-        User foundUser = userRepository.findByEmail(tokenRequest.getEmail())
+        User existingUser = userRepository.findByEmail(tokenRequest.getEmail())
                 .orElseThrow(() -> new UserNotFoundException(
                         String.format("User with email: %s wasn't found!", tokenRequest.getEmail()))
                 );
 
-        if (!foundUser.isActive())
+        if (!existingUser.isActive())
             throw new UserDeactivatedException(
-                    String.format("Account: %s is deactivated!", foundUser.getEmail())
+                    String.format("Account: %s is deactivated!", existingUser.getEmail())
             );
 
-        if (incorrectPassword(tokenRequest.getPassword(), foundUser.getPassword()))
+        if (incorrectPassword(tokenRequest, existingUser))
             throw new UserAuthenticationException("Invalid password!");
 
-        return tokenService.generateTokenFor(foundUser);
+        return tokenService.generateTokenFor(existingUser);
     }
 
-    private boolean incorrectPassword(String plainText, String password) {
-        return BCrypt.checkpw(plainText, password);
+    private boolean incorrectPassword(TokenRequest tokenRequest, User existingUser) {
+        return BCrypt.checkpw(tokenRequest.getPassword(), existingUser.getPassword());
     }
 
 }
