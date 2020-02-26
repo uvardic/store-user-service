@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/shop/server/user")
+@RequestMapping("/store/server/user")
 public class UserRestController {
 
     private final UserService userService;
