@@ -1,6 +1,7 @@
 package store.server.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import store.server.token.dto.TokenRequest;
@@ -17,6 +18,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {

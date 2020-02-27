@@ -3,12 +3,14 @@ package store.server.token.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import store.server.token.dto.TokenResponse;
 import store.server.user.domain.User;
 
+@Slf4j
 @Service
 @PropertySource(value = "/security.properties")
 public class TokenService {
